@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#012d10">
+  <link rel="icon" href="img/icono.png">
+  <link rel="apple-touch-icon" href="img/icono.png">
+  <title>FumiHouse · Agenda</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <section id="vista-login" class="login">
+    <div>
+    <img src="img/logo-oscuro.png" alt="FumiHouse - Expertos en fumigación" class="logo">
+    <form id="form-login" class="card">
+      <h2>Agenda de servicios</h2>
+      <label>Correo <input type="email" id="login-email" required autocomplete="username"></label>
+      <label>Contraseña <input type="password" id="login-pass" required autocomplete="current-password"></label>
+      <button type="submit" class="btn primario">Entrar</button>
+      <p id="login-error" class="error"></p>
+    </form>
+    </div>
+  </section>
+
+  <!-- APP -->
+  <div id="vista-app" class="hidden">
+    <header class="topbar">
+      <img src="img/logo-oscuro.png" alt="FumiHouse" class="logo">
+      <button id="btn-salir" class="btn chico">Salir</button>
+    </header>
+
+    <nav class="tabs">
+      <button data-tab="agenda" class="activo">📅 Agenda</button>
+      <button data-tab="clientes">👤 Clientes</button>
+      <button data-tab="calendario">🔗 Calendario</button>
+    </nav>
+
+    <main>
+      <!-- AGENDA -->
+      <section id="tab-agenda" class="tab">
+        <div class="barra">
+          <select id="filtro-agenda">
+            <option value="hoy">Hoy</option>
+            <option value="semana" selected>Próximos 7 días</option>
+            <option value="proximos">Todos los próximos</option>
+            <option value="pasados">Pasados (30 días)</option>
+          </select>
+          <button id="btn-nuevo-servicio" class="btn primario">+ Servicio</button>
+        </div>
+        <div id="resumen" class="resumen"></div>
+        <div id="lista-servicios"></div>
+      </section>
+
+      <!-- CLIENTES -->
+      <section id="tab-clientes" class="tab hidden">
+        <div class="barra">
+          <input type="search" id="buscar-cliente" placeholder="Buscar cliente...">
+          <button id="btn-nuevo-cliente" class="btn primario">+ Cliente</button>
+        </div>
+        <div id="lista-clientes"></div>
+      </section>
+
+      <!-- CALENDARIO -->
+      <section id="tab-calendario" class="tab hidden">
+        <div class="card">
+          <h2>Sincronizar con tu calendario</h2>
+          <p>Ingresa la clave del calendario (CAL_TOKEN) una sola vez. Se guarda solo en este dispositivo.</p>
+          <label>Clave del calendario <input type="password" id="cal-token"></label>
+          <button id="btn-guardar-token" class="btn">Guardar clave</button>
+          <hr>
+          <p><b>Tu enlace:</b></p>
+          <code id="cal-url">—</code>
+          <div class="acciones">
+            <button id="btn-copiar-cal" class="btn primario">📋 Copiar enlace</button>
+            <button id="btn-descargar-cal" class="btn">⬇️ Descargar .ics</button>
+            <a id="btn-webcal" class="btn">📱 Abrir en iPhone</a>
+          </div>
+          <p class="ayuda">
+            <b>Google Calendar:</b> calendar.google.com → “Otros calendarios” → + → “Desde URL” → pega el enlace.<br>
+            <b>iPhone:</b> toca “Abrir en iPhone” o Ajustes → Calendario → Cuentas → Añadir cuenta → Otra → Añadir calendario suscrito.
+          </p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL SERVICIO -->
+  <dialog id="modal-servicio">
+    <form id="form-servicio" method="dialog">
+      <h2 id="titulo-servicio">Nuevo servicio</h2>
+      <input type="hidden" id="s-id">
+      <label>Cliente
+        <select id="s-cliente" required></select>
+      </label>
+      <label>Fecha y hora <input type="datetime-local" id="s-fecha" required></label>
+      <label>Tipo de servicio
+        <select id="s-tipo" required>
+          <option>Fumigación</option>
+          <option>Desinsectación</option>
+          <option>Desratización</option>
+          <option>Control de termitas</option>
+          <option>Desinfección</option>
+        </select>
+      </label>
+      <div class="fila">
+        <label>Plaga <input id="s-plaga" placeholder="Cucarachas, ratas..."></label>
+        <label>Producto <input id="s-producto"></label>
+      </div>
+      <div class="fila">
+        <label>Área (m²) <input type="number" id="s-area" min="0" step="any"></label>
+        <label>Precio (Bs) <input type="number" id="s-precio" min="0" step="any"></label>
+      </div>
+      <div class="fila">
+        <label>Repetir cada
+          <select id="s-frecuencia">
+            <option value="">No se repite</option>
+            <option value="30">1 mes</option>
+            <option value="60">2 meses</option>
+            <option value="90">3 meses</option>
+            <option value="180">6 meses</option>
+            <option value="365">1 año</option>
+          </select>
+        </label>
+        <label>Estado
+          <select id="s-estado">
+            <option value="pendiente">Pendiente</option>
+            <option value="confirmado">Confirmado</option>
+            <option value="realizado">Realizado</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </label>
+      </div>
+      <label class="check"><input type="checkbox" id="s-pagado"> Pagado</label>
+      <label>Notas <textarea id="s-notas" rows="2"></textarea></label>
+      <div class="acciones">
+        <button type="button" class="btn" data-cerrar>Cancelar</button>
+        <button type="button" id="btn-borrar-servicio" class="btn peligro hidden">Eliminar</button>
+        <button type="submit" class="btn primario">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- MODAL CLIENTE -->
+  <dialog id="modal-cliente">
+    <form id="form-cliente" method="dialog">
+      <h2 id="titulo-cliente">Nuevo cliente</h2>
+      <input type="hidden" id="c-id">
+      <label>Nombre <input id="c-nombre" required></label>
+      <label>Teléfono / WhatsApp <input id="c-telefono" type="tel" placeholder="70000000"></label>
+      <label>Dirección <input id="c-direccion"></label>
+      <div class="fila">
+        <label>Zona <input id="c-zona"></label>
+        <label>Tipo
+          <select id="c-tipo">
+            <option value="domicilio">Domicilio</option>
+            <option value="empresa">Empresa</option>
+            <option value="restaurante">Restaurante</option>
+            <option value="almacén">Almacén</option>
+          </select>
+        </label>
+      </div>
+      <label>Notas <textarea id="c-notas" rows="2"></textarea></label>
+      <div class="acciones">
+        <button type="button" class="btn" data-cerrar>Cancelar</button>
+        <button type="submit" class="btn primario">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
