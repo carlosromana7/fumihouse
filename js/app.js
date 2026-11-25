@@ -1,5 +1,5 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-import { SUPABASE_URL, SUPABASE_ANON_KEY, CALENDARIO_URL } from "./config.js";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js";
 
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = (id) => document.getElementById(id);
@@ -32,6 +32,28 @@ function soloNumeros(tel) {
   return n;
 }
 
+// Enlace para crear el evento en Google Calendar (Google avisa con su recordatorio)
+function linkGoogleCalendar(s) {
+  const f = (d) => d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+  const ini = new Date(s.fecha_hora);
+  const fin = new Date(ini.getTime() + 90 * 60_000);
+  const detalle = [
+    s.telefono ? "Tel: " + s.telefono : "",
+    s.plaga ? "Plaga: " + s.plaga : "",
+    s.producto ? "Producto: " + s.producto : "",
+    s.precio != null ? "Precio: " + s.precio + " Bs" : "",
+    s.notas ?? "",
+  ].filter(Boolean).join("\n");
+  const q = new URLSearchParams({
+    action: "TEMPLATE",
+    text: `${s.tipo_servicio} - ${s.cliente}`,
+    dates: `${f(ini)}/${f(fin)}`,
+    details: detalle,
+    location: [s.direccion, s.zona].filter(Boolean).join(", "),
+  });
+  return "https://calendar.google.com/calendar/render?" + q.toString();
+}
+
 // ---------- Sesión ----------
 async function iniciar() {
   const { data } = await sb.auth.getSession();
@@ -44,7 +66,6 @@ function mostrarVista(logueado) {
   $("vista-app").classList.toggle("hidden", !logueado);
   if (logueado) {
     cargarClientes().then(cargarAgenda);
-    pintarCalendario();
   }
 }
 
@@ -55,7 +76,12 @@ $("form-login").addEventListener("submit", async (e) => {
     email: $("login-email").value.trim(),
     password: $("login-pass").value,
   });
-  if (error) $("login-error").textContent = "Correo o contraseña incorrectos";
+  if (error) {
+    console.error(error);
+    $("login-error").textContent = error.message === "Invalid login credentials"
+      ? "Correo o contraseña incorrectos"
+      : "Error: " + error.message;
+  }
 });
 $("btn-salir").addEventListener("click", () => sb.auth.signOut());
 
@@ -117,7 +143,6 @@ function pintarServicios(lista) {
     if (dia !== diaActual) { html += `<div class="dia">${dia}</div>`; diaActual = dia; }
     const tel = soloNumeros(s.telefono);
     const dir = [s.direccion, s.zona].filter(Boolean).join(", ");
-    const mapa = dir ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(dir + ", Bolivia")}` : "";
     const wa = tel ? `https://wa.me/${tel}?text=${encodeURIComponent(
       `Hola ${s.cliente}, le confirmamos su servicio de ${s.tipo_servicio} el ${fmtDia(s.fecha_hora)} a las ${fmtHora(s.fecha_hora)}.`)}` : "";
 
@@ -142,7 +167,7 @@ function pintarServicios(lista) {
       <div class="links">
         ${tel ? `<a class="btn chico" href="tel:+${tel}">📞 Llamar</a>` : ""}
         ${wa ? `<a class="btn chico" href="${wa}" target="_blank">💬 WhatsApp</a>` : ""}
-        ${mapa ? `<a class="btn chico" href="${mapa}" target="_blank">🗺️ Mapa</a>` : ""}
+        ${["pendiente", "confirmado"].includes(s.estado) ? `<a class="btn chico" href="${linkGoogleCalendar(s)}" target="_blank">📅 Agregar a mi calendario</a>` : ""}
       </div>
       <div class="acciones">
         ${s.estado === "pendiente" ? `<button class="btn chico" data-accion="confirmado" data-id="${s.id}">Confirmar</button>` : ""}
@@ -322,35 +347,6 @@ $("form-cliente").addEventListener("submit", async (e) => {
   toast("Cliente guardado");
   await cargarClientes();
   cargarAgenda();
-});
-
-// ---------- Calendario ----------
-function urlCalendario() {
-  const t = localStorage.getItem("cal_token");
-  return t ? `${CALENDARIO_URL}?token=${encodeURIComponent(t)}` : null;
-}
-function pintarCalendario() {
-  const url = urlCalendario();
-  $("cal-token").value = localStorage.getItem("cal_token") ?? "";
-  $("cal-url").textContent = url ?? "Primero guarda la clave del calendario";
-  $("btn-webcal").href = url ? url.replace(/^https:/, "webcal:") : "#";
-}
-$("btn-guardar-token").addEventListener("click", () => {
-  const t = $("cal-token").value.trim();
-  if (t) localStorage.setItem("cal_token", t); else localStorage.removeItem("cal_token");
-  pintarCalendario();
-  toast("Clave guardada");
-});
-$("btn-copiar-cal").addEventListener("click", async () => {
-  const url = urlCalendario();
-  if (!url) return toast("Primero guarda la clave");
-  await navigator.clipboard.writeText(url);
-  toast("Enlace copiado");
-});
-$("btn-descargar-cal").addEventListener("click", () => {
-  const url = urlCalendario();
-  if (!url) return toast("Primero guarda la clave");
-  window.open(url, "_blank");
 });
 
 // ---------- Cerrar modales ----------

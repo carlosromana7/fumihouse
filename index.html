@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#012d10">
   <link rel="icon" href="img/icono.png">
-  <link rel="apple-touch-icon" href="img/icono.png">
+  <link rel="apple-touch-icon" href="img/icono-512.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <title>FumiHouse · Agenda</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -35,7 +37,6 @@
     <nav class="tabs">
       <button data-tab="agenda" class="activo">📅 Agenda</button>
       <button data-tab="clientes">👤 Clientes</button>
-      <button data-tab="calendario">🔗 Calendario</button>
     </nav>
 
     <main>
@@ -63,27 +64,6 @@
         <div id="lista-clientes"></div>
       </section>
 
-      <!-- CALENDARIO -->
-      <section id="tab-calendario" class="tab hidden">
-        <div class="card">
-          <h2>Sincronizar con tu calendario</h2>
-          <p>Ingresa la clave del calendario (CAL_TOKEN) una sola vez. Se guarda solo en este dispositivo.</p>
-          <label>Clave del calendario <input type="password" id="cal-token"></label>
-          <button id="btn-guardar-token" class="btn">Guardar clave</button>
-          <hr>
-          <p><b>Tu enlace:</b></p>
-          <code id="cal-url">—</code>
-          <div class="acciones">
-            <button id="btn-copiar-cal" class="btn primario">📋 Copiar enlace</button>
-            <button id="btn-descargar-cal" class="btn">⬇️ Descargar .ics</button>
-            <a id="btn-webcal" class="btn">📱 Abrir en iPhone</a>
-          </div>
-          <p class="ayuda">
-            <b>Google Calendar:</b> calendar.google.com → “Otros calendarios” → + → “Desde URL” → pega el enlace.<br>
-            <b>iPhone:</b> toca “Abrir en iPhone” o Ajustes → Calendario → Cuentas → Añadir cuenta → Otra → Añadir calendario suscrito.
-          </p>
-        </div>
-      </section>
     </main>
   </div>
 
