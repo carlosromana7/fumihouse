@@ -9,72 +9,159 @@
   <link rel="manifest" href="manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>FumiHouse · Agenda</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
-  <!-- LOGIN -->
+  <!-- ============ LOGIN ============ -->
   <section id="vista-login" class="login">
-    <div>
-    <img src="img/logo-oscuro.png" alt="FumiHouse - Expertos en fumigación" class="logo">
-    <form id="form-login" class="card">
-      <h2>Agenda de servicios</h2>
-      <label>Correo <input type="email" id="login-email" required autocomplete="username"></label>
-      <label>Contraseña <input type="password" id="login-pass" required autocomplete="current-password"></label>
-      <button type="submit" class="btn primario">Entrar</button>
-      <p id="login-error" class="error"></p>
-    </form>
+    <div class="login-caja">
+      <img src="img/logo-oscuro.png" alt="FumiHouse - Expertos en fumigación" class="login-logo">
+      <form id="form-login" class="card">
+        <h2>Agenda de servicios</h2>
+        <p class="sub">Ingresa con tu cuenta</p>
+        <label>Correo <input type="email" id="login-email" required autocomplete="username"></label>
+        <label>Contraseña <input type="password" id="login-pass" required autocomplete="current-password"></label>
+        <button type="submit" class="btn primario ancho">Entrar</button>
+        <p id="login-error" class="error"></p>
+      </form>
     </div>
   </section>
 
-  <!-- APP -->
-  <div id="vista-app" class="hidden">
-    <header class="topbar">
-      <img src="img/logo-oscuro.png" alt="FumiHouse" class="logo">
-      <button id="btn-salir" class="btn chico">Salir</button>
-    </header>
+  <!-- ============ APP ============ -->
+  <div id="vista-app" class="app hidden">
 
-    <nav class="tabs">
-      <button data-tab="agenda" class="activo">📅 Agenda</button>
-      <button data-tab="clientes">👤 Clientes</button>
+    <!-- Menú lateral -->
+    <aside class="sidebar">
+      <img src="img/logo-claro.png" alt="FumiHouse" class="side-logo">
+      <p class="side-titulo">MENÚ</p>
+      <nav class="side-nav">
+        <button data-vista="dashboard" class="activo"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg><span>Dashboard</span></button>
+        <button data-vista="agenda"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M16 3v4M8 3v4M3 10h18"/></svg><span>Agenda</span><em id="badge-hoy" class="badge-menu hidden"></em></button>
+        <button data-vista="clientes"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6M16 4a4 4 0 010 8M22 21c0-3-2-5-4-5.5"/></svg><span>Clientes</span></button>
+        <button data-vista="cobros"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="13" rx="3"/><circle cx="12" cy="12.5" r="2.5"/><path d="M6 10v5M18 10v5"/></svg><span>Por cobrar</span></button>
+      </nav>
+      <p class="side-titulo">GENERAL</p>
+      <nav class="side-nav">
+        <button id="btn-salir"><svg viewBox="0 0 24 24"><path d="M15 4h3a2 2 0 012 2v12a2 2 0 01-2 2h-3M10 17l-5-5 5-5M5 12h11"/></svg><span>Salir</span></button>
+      </nav>
+      <div class="side-promo">
+        <svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg>
+        <b>Llévala en tu celular</b>
+        <p>Abre esta página en el celular y elige “Agregar a pantalla de inicio”.</p>
+      </div>
+    </aside>
+
+    <div class="principal">
+      <!-- Barra superior -->
+      <header class="topbar">
+        <div class="buscar">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input type="search" id="buscar" placeholder="Buscar cliente, zona o servicio...">
+        </div>
+        <div class="usuario">
+          <div class="avatar" id="avatar">F</div>
+          <div class="usuario-txt"><b>FumiHouse</b><span id="usuario-email"></span></div>
+        </div>
+      </header>
+
+      <main>
+        <!-- ===== DASHBOARD ===== -->
+        <section id="vista-dashboard" class="vista">
+          <div class="cabecera">
+            <div>
+              <h1>Dashboard</h1>
+              <p class="sub" id="fecha-hoy"></p>
+            </div>
+            <div class="cab-acciones">
+              <button class="btn primario" data-nuevo-servicio><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo servicio</button>
+              <button class="btn contorno" data-nuevo-cliente>Nuevo cliente</button>
+            </div>
+          </div>
+
+          <div class="grid-kpi" id="kpis"></div>
+
+          <div class="grid-dash">
+            <div class="card c-chart">
+              <div class="card-tit"><h3>Servicios de la semana</h3><span class="leyenda"><i class="l-real"></i>Realizados <i class="l-pend"></i>Programados</span></div>
+              <div id="chart-semana" class="chart"></div>
+            </div>
+            <div class="card c-proximo" id="card-proximo"></div>
+            <div class="card c-lista">
+              <div class="card-tit"><h3>Próximos servicios</h3><button class="btn mini contorno" data-nuevo-servicio>+ Nuevo</button></div>
+              <div id="lista-proximos"></div>
+            </div>
+            <div class="card c-cobrar">
+              <div class="card-tit"><h3>Pendientes de cobro</h3><button class="btn mini contorno" data-ir="cobros">Ver todo</button></div>
+              <div id="lista-cobrar-dash"></div>
+            </div>
+            <div class="card c-gauge">
+              <div class="card-tit"><h3>Cobranza del mes</h3></div>
+              <div id="gauge"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== AGENDA ===== -->
+        <section id="vista-agenda" class="vista hidden">
+          <div class="cabecera">
+            <div><h1>Agenda</h1><p class="sub">Todos tus servicios programados</p></div>
+            <div class="cab-acciones"><button class="btn primario" data-nuevo-servicio><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo servicio</button></div>
+          </div>
+          <div class="chips" id="filtro-periodo">
+            <button data-p="hoy">Hoy</button>
+            <button data-p="semana" class="activo">7 días</button>
+            <button data-p="proximos">Próximos</button>
+            <button data-p="pasados">Pasados</button>
+            <button data-p="todos">Todos</button>
+          </div>
+          <div class="chips" id="filtro-estado">
+            <button data-e="" class="activo">Todos los estados</button>
+            <button data-e="pendiente">Pendiente</button>
+            <button data-e="confirmado">Confirmado</button>
+            <button data-e="realizado">Realizado</button>
+            <button data-e="cancelado">Cancelado</button>
+          </div>
+          <div id="lista-agenda"></div>
+        </section>
+
+        <!-- ===== CLIENTES ===== -->
+        <section id="vista-clientes" class="vista hidden">
+          <div class="cabecera">
+            <div><h1>Clientes</h1><p class="sub" id="sub-clientes"></p></div>
+            <div class="cab-acciones"><button class="btn primario" data-nuevo-cliente><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo cliente</button></div>
+          </div>
+          <div class="card sin-pad"><div id="tabla-clientes"></div></div>
+        </section>
+
+        <!-- ===== POR COBRAR ===== -->
+        <section id="vista-cobros" class="vista hidden">
+          <div class="cabecera">
+            <div><h1>Por cobrar</h1><p class="sub">Servicios realizados que aún no se pagaron</p></div>
+          </div>
+          <div class="card sin-pad"><div id="lista-cobros"></div></div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Menú inferior (celular) -->
+    <nav class="bottom-nav">
+      <button data-vista="dashboard" class="activo"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg>Inicio</button>
+      <button data-vista="agenda"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>Agenda</button>
+      <button class="fab" data-nuevo-servicio aria-label="Nuevo servicio"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+      <button data-vista="clientes"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6"/></svg>Clientes</button>
+      <button data-vista="cobros"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="13" rx="3"/><circle cx="12" cy="12.5" r="2.5"/></svg>Cobros</button>
     </nav>
-
-    <main>
-      <!-- AGENDA -->
-      <section id="tab-agenda" class="tab">
-        <div class="barra">
-          <select id="filtro-agenda">
-            <option value="hoy">Hoy</option>
-            <option value="semana" selected>Próximos 7 días</option>
-            <option value="proximos">Todos los próximos</option>
-            <option value="pasados">Pasados (30 días)</option>
-          </select>
-          <button id="btn-nuevo-servicio" class="btn primario">+ Servicio</button>
-        </div>
-        <div id="resumen" class="resumen"></div>
-        <div id="lista-servicios"></div>
-      </section>
-
-      <!-- CLIENTES -->
-      <section id="tab-clientes" class="tab hidden">
-        <div class="barra">
-          <input type="search" id="buscar-cliente" placeholder="Buscar cliente...">
-          <button id="btn-nuevo-cliente" class="btn primario">+ Cliente</button>
-        </div>
-        <div id="lista-clientes"></div>
-      </section>
-
-    </main>
   </div>
 
-  <!-- MODAL SERVICIO -->
+  <!-- ============ MODAL SERVICIO ============ -->
   <dialog id="modal-servicio">
     <form id="form-servicio" method="dialog">
       <h2 id="titulo-servicio">Nuevo servicio</h2>
       <input type="hidden" id="s-id">
-      <label>Cliente
-        <select id="s-cliente" required></select>
-      </label>
+      <label>Cliente <select id="s-cliente" required></select></label>
       <label>Fecha y hora <input type="datetime-local" id="s-fecha" required></label>
       <label>Tipo de servicio
         <select id="s-tipo" required>
@@ -116,14 +203,15 @@
       <label class="check"><input type="checkbox" id="s-pagado"> Pagado</label>
       <label>Notas <textarea id="s-notas" rows="2"></textarea></label>
       <div class="acciones">
-        <button type="button" class="btn" data-cerrar>Cancelar</button>
         <button type="button" id="btn-borrar-servicio" class="btn peligro hidden">Eliminar</button>
+        <span class="espacio"></span>
+        <button type="button" class="btn contorno" data-cerrar>Cancelar</button>
         <button type="submit" class="btn primario">Guardar</button>
       </div>
     </form>
   </dialog>
 
-  <!-- MODAL CLIENTE -->
+  <!-- ============ MODAL CLIENTE ============ -->
   <dialog id="modal-cliente">
     <form id="form-cliente" method="dialog">
       <h2 id="titulo-cliente">Nuevo cliente</h2>
@@ -144,14 +232,14 @@
       </div>
       <label>Notas <textarea id="c-notas" rows="2"></textarea></label>
       <div class="acciones">
-        <button type="button" class="btn" data-cerrar>Cancelar</button>
+        <span class="espacio"></span>
+        <button type="button" class="btn contorno" data-cerrar>Cancelar</button>
         <button type="submit" class="btn primario">Guardar</button>
       </div>
     </form>
   </dialog>
 
   <div id="toast" class="toast hidden"></div>
-
   <script type="module" src="js/app.js"></script>
 </body>
 </html>
